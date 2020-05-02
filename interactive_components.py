@@ -11,6 +11,12 @@ def interactive_hist(**kwargs):
     """
     global naive_bayes_classifier
     # update naive bayes by label 
+    if "sentence" in kwargs:
+        sentence= kwargs.pop("sentence")
+        prediction = naive_bayes_classifier.predict(sentence)
+        output = prediction["prediction"]
+        print(f"Probability sentence: {sentence} is a: \ngood review is {prediction[1]:.2f}\na bad review is {prediction[0]:.2f},\nclassification: {output}")
+
     word_update_dict = {0: {}, 1: {}}
     for word_name, freq in kwargs.items():
         word_split = word_name.split('_')

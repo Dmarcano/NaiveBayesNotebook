@@ -2,6 +2,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 import os
 import string
+import functools
 
 """
 A somewhat hard_coded not the prettiest implementation of a naive bayes
@@ -24,6 +25,10 @@ class NaiveBayes():
         """
         Training for binary classification. 
         """
+        if self.trained:
+            self.bag_of_words = {0: {}, 1: {}}
+            self.trained = False
+
         for index, row in dataframe.iterrows():
             label, text = row['label'], row['text']
             self.label_count[label] += 1
@@ -74,10 +79,10 @@ class NaiveBayes():
         failure_freq = list(word_freq_in_failure.values())
         
         fig, axs = plt.subplots(1, 2, figsize=(9, 3), sharey=True)
-        axs[0].bar(success_words, success_freq, color = "darkblue")
+        axs[0].bar(success_words, success_freq, color = "darkblue" ,width = 0.8)
         axs[0].set_title("Words in Success")
         axs[0].set_ylabel('freq')
-        axs[1].bar(failure_words, failure_freq, color = "crimson")
+        axs[1].bar(failure_words, failure_freq, color = "crimson", width = 0.8)
         axs[1].set_title("Words in Failure")
         axs[1].set_ylabel('freq')
         # fig.suptitle('Naive Bayes Word Frequency')
@@ -103,29 +108,63 @@ class NaiveBayes():
 
         Right now it either predicts a 1 or 0
         """
-
-
+        success_count = self.get_count(1)
+        fail_total_count = self.get_count(0)
+        prob_success = success_count/ (success_count + fail_total_count) # P(X = 1)
+        prob_fail = fail_total_count/ (success_count + fail_total_count)# P(X = 0)
         # For this 
         word_list = self.preprocess_sentence(sentence)
         word_probabilities = {}
-        for word in word_list:
-            word_probabilities[word] = get_word_conditional_probability(word) 
+        # get all the conditional probabilities for each word
+        word_probability_list = list(map(lambda word : self.get_word_conditional_prob(word), word_list))
+        # get the product of P(A|1)P(B|1)....P(1)
+        prob_given_success = functools.reduce(lambda previous, current: previous[1] * current[1] if isinstance(previous, dict) else previous * current[1] , word_probability_list)
+        # get the product of P(A|0)P(B|0)....P(0)
+        prob_given_failure = functools.reduce(lambda previous, current: previous[0] * current[0] if isinstance(previous, dict) else previous * current[0] , word_probability_list)
+        # calculate bayes of success and failure
+        prob_succes_given_sentence = prob_given_success/(prob_given_success + prob_given_failure)
+        prob_fail_given_sentence = prob_given_failure/(prob_given_success + prob_given_failure)
+
+        prediction = 1 if prob_succes_given_sentence >= prob_fail_given_sentence else 0
+        return {"prediction" : prediction, 1 : prob_succes_given_sentence, 0 : prob_fail_given_sentence}
 
 
-        return 
+    def get_word_conditional_prob(self,word):
+        scss_word_count = self.get_word_count(word)[1]
+        scss_total_count = self.get_count(1)
+        fail_total_count = self.get_count(0)
+        fail_word_count =  self.get_word_count(word)[0]
 
+         # now calculate the proabbilities of each label (binary for now)
+        prob_success = scss_total_count/ (scss_total_count + fail_total_count) # P(X = 1)
+        prob_fail = fail_total_count/ (scss_total_count + fail_total_count)# P(X = 0)
+        # now calculate probability for word
+        scss_word_prob = scss_word_count / (scss_word_count + fail_word_count)# P(W = word | X = 1)
+        fail_word_prob = fail_word_count / (scss_word_count + fail_word_count)# P(W = word | X = 0)
 
-    def get_word_conditional_probability(self, word):
+        return {1: scss_word_prob, 0: fail_word_prob}
+    def get_conditional_probability_given_word(self, word):
         """
         Given a word, returns a dictionary of the conditional probabilities that the word belongs 
         to a specific label 
         """
-        scss_word_count = self.bag_of_words[1][word]
+        scss_word_count = self.get_word_count(word)[1]
         scss_total_count = self.get_count(1)
         fail_total_count = self.get_count(0)
-        fail_word_count =  self.bag_of_words[0][word]
+        fail_word_count =  self.get_word_count(word)[0]
 
-        return {1: scss_word_count/scss_total_count,0 : fail_word_count /fail_total_count}  
+
+        # now calculate the proabbilities of each label (binary for now)
+        prob_success = scss_total_count/ (scss_total_count + fail_total_count) # P(X = 1)
+        prob_fail = fail_total_count/ (scss_total_count + fail_total_count)# P(X = 0)
+        # now calculate probability for word
+        scss_word_prob = scss_word_count / (scss_word_count + fail_word_count)# P(W = word | X = 1)
+        fail_word_prob = fail_word_count / (scss_word_count + fail_word_count)# P(W = word | X = 0)
+
+        probability_success_given_word = scss_word_prob * prob_success/ (scss_word_prob * prob_success + fail_word_prob * prob_fail)
+        probability_fail_given_word = scss_word_prob * fail_word_prob/ (scss_word_prob * prob_success + fail_word_prob * prob_fail)
+
+        return {1: probability_success_given_word,0 : probability_fail_given_word}  
 
     def set_word_freq(self, label, **kwargs):
         """
@@ -139,7 +178,9 @@ class NaiveBayes():
         return 
 
     def get_word_count(self, word):
-
+        if word not in self.bag_of_words[0]:
+            self.bag_of_words[0][word] = self.alpha
+            self.bag_of_words[1][word] = self.alpha
         return {0: self.bag_of_words[0][word], 1: self.bag_of_words[1][word]}
 
     
@@ -152,10 +193,11 @@ def test():
     # words = ["good", "food", "bad", "really"]
     # fig, axs = classifier.historgram("good", "food", "bad", "really")
     # plt.show()
+    sentence = "Food taste good."
 
-    word_update = {'good': 2, 'really': 1}
+    # classifier.set_word_freq( 0, **word_update)
 
-    classifier.set_word_freq( 0, **word_update)
+    out = classifier.predict(sentence)
 
     print("Done!")
 
