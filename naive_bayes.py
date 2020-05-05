@@ -39,14 +39,19 @@ class NaiveBayes():
                     self.bag_of_words[label][word]+= 1
                     pass
 
-            all_words =  set(list(self.bag_of_words[0].keys())  + list(self.bag_of_words[1].keys()))
+        all_words =  set(list(self.bag_of_words[0].keys())  + list(self.bag_of_words[1].keys()))
 
-            #TODO implemenet for multiple classes of classification (maybe)
-            for word in all_words:
-                if word not in self.bag_of_words[0]:
-                    self.bag_of_words[0][word] = self.alpha
-                if word not in self.bag_of_words[1]:
-                    self.bag_of_words[1][word] = self.alpha
+        #TODO implemenet for multiple classes of classification (maybe)
+        for word in all_words:
+            self.bag_of_words[0][word] = self.alpha if word not in self.bag_of_words[0] else self.bag_of_words[0][word] + self.alpha
+            self.bag_of_words[1][word] = self.alpha if word not in self.bag_of_words[1] else self.bag_of_words[1][word] + self.alpha
+            
+            # if word not in self.bag_of_words[0]:
+            #     self.bag_of_words[0][word] = self.alpha 
+                
+            # if word not in self.bag_of_words[1]:
+            #     self.bag_of_words[1][word] = self.alpha
+                    
         
         self.trained = True
         return 
@@ -112,18 +117,26 @@ class NaiveBayes():
         fail_total_count = self.get_count(0)
         prob_success = success_count/ (success_count + fail_total_count) # P(X = 1)
         prob_fail = fail_total_count/ (success_count + fail_total_count)# P(X = 0)
-        # For this 
+
+        # pre-process the sentence and  get all the conditional probabilities for each word
         word_list = self.preprocess_sentence(sentence)
-        word_probabilities = {}
-        # get all the conditional probabilities for each word
         word_probability_list = list(map(lambda word : self.get_word_conditional_prob(word), word_list))
         # get the product of P(A|1)P(B|1)....P(1)
         prob_given_success = functools.reduce(lambda previous, current: previous[1] * current[1] if isinstance(previous, dict) else previous * current[1] , word_probability_list)
+        prob_given_success *= prob_success
         # get the product of P(A|0)P(B|0)....P(0)
         prob_given_failure = functools.reduce(lambda previous, current: previous[0] * current[0] if isinstance(previous, dict) else previous * current[0] , word_probability_list)
+        prob_given_failure *= prob_fail
         # calculate bayes of success and failure
-        prob_succes_given_sentence = prob_given_success/(prob_given_success + prob_given_failure)
-        prob_fail_given_sentence = prob_given_failure/(prob_given_success + prob_given_failure)
+        try:
+            prob_succes_given_sentence = prob_given_success/(prob_given_success + prob_given_failure)
+        except ZeroDivisionError:
+            prob_succes_given_sentence = 0 # This is really bad! and should never happen only for pedagogy reasons is this code here
+        
+        try:
+            prob_fail_given_sentence = prob_given_failure/(prob_given_success + prob_given_failure)
+        except ZeroDivisionError:
+            prob_fail_given_sentence = 0
 
         prediction = 1 if prob_succes_given_sentence >= prob_fail_given_sentence else 0
         return {"prediction" : prediction, 1 : prob_succes_given_sentence, 0 : prob_fail_given_sentence}
@@ -197,8 +210,9 @@ def test():
 
     # classifier.set_word_freq( 0, **word_update)
 
-    out = classifier.predict(sentence)
-
+    # prediction = classifier.predict(sentence)
+    prediction = classifier.predict('food was really bad')
+    print(f"The builtin naive bayes prediction: positive: {prediction[1]: .2f}, negative{prediction[0]: .2f}, prediction {prediction['prediction']}")
     print("Done!")
 
 
