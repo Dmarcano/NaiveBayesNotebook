@@ -67,6 +67,13 @@ class NaiveBayes():
         new_dict = {'good' : self.bag_of_words[1], 'bad' : self.bag_of_words[0] }
         return pd.DataFrame.from_dict(new_dict)
 
+    def filtered_table(self, *words):
+        filtered_good_dict = {key: val for (key,val) in self.bag_of_words[1].items() if key in words}
+        filtered_bad_dict = {key: val for key, val in self.bag_of_words[0].items() if key in words}
+        new_dict = {'good' : filtered_good_dict, 'bad' : filtered_bad_dict}
+
+        return pd.DataFrame.from_dict(new_dict)
+
     def historgram(self, *args):
         """
         Given a list of words that are inside the bag of words for the naive bayes classifier
@@ -191,10 +198,11 @@ class NaiveBayes():
         return 
 
     def get_word_count(self, word):
-        if word not in self.bag_of_words[0]:
-            self.bag_of_words[0][word] = self.alpha
-            self.bag_of_words[1][word] = self.alpha
+        if word not in self.bag_of_words[0] or word not in self.bag_of_words[1]:
+            return {0: self.alpha, 1: self.alpha}
         return {0: self.bag_of_words[0][word], 1: self.bag_of_words[1][word]}
+
+    
 
     
 
@@ -206,13 +214,13 @@ def test():
     # words = ["good", "food", "bad", "really"]
     # fig, axs = classifier.historgram("good", "food", "bad", "really")
     # plt.show()
-    sentence = "Food taste good."
-
+    # sentence = "Food taste good."
+    sentence = "Food was really bad."
     # classifier.set_word_freq( 0, **word_update)
-
     # prediction = classifier.predict(sentence)
-    prediction = classifier.predict('food was really bad')
-    print(f"The builtin naive bayes prediction: positive: {prediction[1]: .2f}, negative{prediction[0]: .2f}, prediction {prediction['prediction']}")
+    # prediction = classifier.predict('food was really bad')
+    print(classifier.filtered_table("food", 'was', 'really', 'bad'))
+    # print(f"The builtin naive bayes prediction: positive: {prediction[1]: .2f}, negative{prediction[0]: .2f}, prediction {prediction['prediction']}")
     print("Done!")
 
 
