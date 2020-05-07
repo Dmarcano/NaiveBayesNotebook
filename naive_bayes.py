@@ -163,6 +163,7 @@ class NaiveBayes():
         fail_word_prob = fail_word_count / (scss_word_count + fail_word_count)# P(W = word | X = 0)
 
         return {1: scss_word_prob, 0: fail_word_prob}
+        
     def get_conditional_probability_given_word(self, word):
         """
         Given a word, returns a dictionary of the conditional probabilities that the word belongs 
