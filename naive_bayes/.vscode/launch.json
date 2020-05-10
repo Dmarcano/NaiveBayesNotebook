@@ -13,15 +13,19 @@
                 "<node_internals>/**"
             ]
         },
+        
+            
         {
-            "type": "node",
-            "request": "launch",
-            "name": "Launch Next Js",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "program": "${workspaceFolder}/start"
+        "type": "node",
+        "request": "attach",
+        "name": "Attach Next js",
+        "skipFiles": [
+            "<node_internals>/**"
+        ],
+            "port": 9229
         }
+    
+          
 
     ]
 }

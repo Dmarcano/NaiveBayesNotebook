@@ -1,42 +1,47 @@
 import Layout from '../components/Layout';
-import Link from 'next/link';
-import dynamic from 'next/dynamic';
+import BlogPost  from "../components/BlogTemplate"
+import fs from 'fs'
+import matter from 'gray-matter'
+import ReactMarkdown from 'react-markdown'
+
+
+// export async function getStaticProps(){
+
+// }
+export async function getStaticProps() {
+  const fileName = './posts/naive_bayes/naive_bayes.md'
+  const fileContent = fs.readFileSync(fileName, 'utf8')
+  const config = await import('../data/config.json')
+  const data = matter(fileContent)
+  // console.log(data)
+  // console.log(fileContent)
+  // console.log("inside static props?")
 
 
 
-function getPages() {
-  return [
-    { id: "sample", url: '/sample', title: "Sample Covid Summary" }
-  ]
+  return {
+    props: {
+      siteTitle: config.title,
+      frontmatter: data.data,
+      markdownBody: data.content,
+    },
+  }
+
 }
 
-const DirectLink = ({ page }) => (
-  <li>
-    <Link href={page.url}>
-      <a>{page.title}</a>
-    </Link>
-  </li>
-)
 
-export default function Index() {
-  debugger;
+export default function Index(props) {
 
   return (
     <Layout>
-      <h1>COVID-19 Quick site</h1>
-      <p>
-        This page has some sample information and links on using the current API
-        The link below takes to a page using sample information gathered from the data API
-       </p>
+      <br></br>
+        <article>
+        {/* <h1>{'Sample'}</h1> */}
+        <div>
+          <ReactMarkdown source={props.markdownBody} />
+        </div>
+      </article>
 
-      {getPages().map(post => (
-        <DirectLink key={post.id} page={post} />
-      ))}
-
-      <p>
-        The button below links to the API url. Calling an HTTP request to the url below from any application will yield the following json response <br />
-        <a href='/api/time_series'>API Call</a>
-      </p>
       <style jsx>{`
          h1,
          a {

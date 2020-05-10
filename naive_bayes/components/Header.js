@@ -41,8 +41,9 @@ const Header = () => {
           <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
           </IconButton>
           <Typography variant="h6" className={classes.title}>
-            Naive Bayes
+            Simply Complex
           </Typography>
+          <Link href="#pookie"><a>this page!</a></Link>
         </Toolbar>
       </AppBar>
     </div>
