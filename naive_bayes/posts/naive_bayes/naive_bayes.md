@@ -135,9 +135,15 @@ Now from the list of words we ask the question, given a specific word, what is t
 For each individual word, we simply look at the frequency each word pops up in our bag of words. A good visualization of this is making a histogram for the frequency of each word in our training set
 
 
+<center>
+
 ![alt text][sampleHistogram]
 
 [sampleHistogram]:diagrams/charts/recharts_threeword.png "Histogram of words"
+
+</center>
+
+
 Lett's take a look at the word **good**
 
 Given that we have the word **good**, what is the probability that our review is positive?
@@ -173,8 +179,27 @@ From the probabilities listed above we can simply get the counts from our bag of
 So with the word example this looks like
 
 
+1. Look at bag of words to get the necessary frequencies
 
+| Word       | Good Count         |  Bad Count | 
+| :-------------: |:-------------:| :-------------:| 
+| good| 3  | 1| 
+| total counts | 22 | 11|
+|total reviews|6 | 4|
 
+2. Use the counts to calculate necessary probabilities
+
+**P(word =good | review = 1) = 3/4 = 0.75**
+
+** P(review =1 )  = 22 / 33 = 0.67**
+
+**P(word = good) = (0.67)(0.75) + (0.33)(0.25) = 0.58 **
+
+3. Use Bayes Rule to calculate the probability a review is good
+
+**P(review = 1 | word = good) = ((0.67)(0.75))/0.58  = 0.86**
+
+We conclude that we have an 86 percent chance to have a positive review given just the word *good*
 
 ## Now finding the probability of multiple words
 
@@ -191,13 +216,28 @@ There are multiple ways of finding this joint probability. One approach is by di
 
 Instead we can remember the idea of joint independent probabilities. The formula for two events A and B given that A and B are independent from each other is 
 
-$${\large P(A \cap B) = P(A)P(B)}$$
+<!-- TODO REPLACE -->
+
+![alt text][naiveIndependence]
+
+[naiveIndependence]:diagrams/independent_joint_prob.png "good"
+
+
+<!-- $${\large P(A \cap B) = P(A)P(B)}$$ -->
 
 In our case we can rewrite the probability of seeing each specific review as the product of the probabilities of seeing each individual word much like just looking at a one word review.
 
 So 
 
-$ P(review = positive | word_1 = food \cap word_2 = taste \cap word_3 = good )  = P(review = positive | word = food)P(review = positive | word = taste)P(review = positive | word = food)$
+![alt text][naive_review1]
+[naive_review1]:diagrams/naive_review_1.png "naive review"
+
+![alt text][naive_review2]
+[naive_review2]:diagrams/naive_review_2.png "naive review"
+
+
+
+<!-- $ P(review = positive | word_1 = food \cap word_2 = taste \cap word_3 = good )  = P(review = positive | word = food)P(review = positive | word = taste)P(review = positive | word = food)$ -->
 
 
 Now this is not entirely true. The fact that a word such as $good$ is in a review may indeed change the probability we see some other words such as $bad$ but in practice this assumption creates results that are very accurate even with small datasets.
