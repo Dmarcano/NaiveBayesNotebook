@@ -2,10 +2,10 @@ const papa = require("papaparse");
 const fs = require('fs')
 
 class NaiveBayes{
-    constructor(alpha = 0){
+    constructor(alpha = 1){
         this.bag_of_words = {0 : {}, 1: {}};
         this.label_count = {0: 0 , 1: 0};
-        this.alpha  = alpha;
+        this.alpha  = Math.max(1, alpha);
         this.trained = false;
     }
 
@@ -46,7 +46,7 @@ class NaiveBayes{
     }
 
     get_word_count(word){
-        if( ! this.bag_of_words[1].hasOwnProperty(word) || this.bag_of_words[0].hasOwnProperty(word) ){
+        if( ! this.bag_of_words[1].hasOwnProperty(word) || !this.bag_of_words[0].hasOwnProperty(word) ){
             return {0 : this.alpha , 1: this.alpha}
         }
         return {0: this.bag_of_words[0][word], 1: this.bag_of_words[1][word]}
@@ -86,12 +86,16 @@ class NaiveBayes{
         // Get the total probabilities
         const success_count = this.get_count(1)
         const fail_count = this.get_count(0)
-        const prob_success = success_count/ (success_count + fail_total_count) // P(X = 1)
-        const prob_fail = fail_total_count/ (success_count + fail_total_count) // P(X = 0)
+        const prob_success = success_count/ (success_count + fail_count) // P(X = 1)
+        const prob_fail = fail_count/ (success_count + fail_count) // P(X = 0)
         // get the specific word probabilities
         const word_success_count = this.get_word_count(word)[1]
         const word_fail_count = this.get_word_count(word)[0]
 
+        const scss_word_prob = word_success_count / (word_success_count + word_fail_count)// P(W = word | X = 1)
+        const fail_word_prob = word_fail_count / (word_success_count + word_fail_count)// P(W = word | X = 0)
+
+        return {1: scss_word_prob, 0: fail_word_prob}
     }
 
     get_conditional_probability_given_word(){
@@ -111,20 +115,35 @@ class NaiveBayes{
         *@param {[string]} sentence sentence to predict with classifier
     */
     predict(sentence){
-        
+        // get the counts for the probability of success
         const success_count = this.get_count(1)
         const fail_count = this.get_count(0)
-        const prob_success = success_count/ (success_count + fail_total_count) // P(X = 1)
-        const prob_fail = fail_total_count/ (success_count + fail_total_count) // P(X = 0)
-
-        
-
+        const prob_success = success_count/ (success_count + fail_count) // P(X = 1)
+        const prob_fail = fail_count/ (success_count + fail_count) // P(X = 0)
+        // get the probabilities each word in sentence belongs to a label
         const word_list = this.preprocess_sentence(sentence)
+        const word_probability_list = word_list.map(word => this.get_word_conditional_probabilty(word));
+        // get the product of P(A|1)P(B|1)....P(1)
+        let prob_given_success = word_probability_list.reduce((totalProb, currentProb)=> isPlainObject(totalProb) ? totalProb[1] * currentProb[1]: totalProb * currentProb[1] )
+        prob_given_success = prob_given_success* prob_success;
+        // get the product of P(A|0)P(B|0)....P(0)
+        let prob_given_fail = word_probability_list.reduce((totalProb, currentProb)=> isPlainObject(totalProb) ? totalProb[0] * currentProb[0]: totalProb * currentProb[0] )
+        prob_given_fail = prob_given_fail * prob_fail;
 
-        word_probability_list = word_list.map(word => this.get_word_conditional_probabilty(word));
+        const prob_succes_given_sentence = prob_given_success/(prob_given_success + prob_given_fail)
+        const prob_fail_given_sentence = prob_given_fail/(prob_given_success + prob_given_fail)
+
+        const prediction = prob_succes_given_sentence >= prob_fail_given_sentence ? 1 :0
+        return {prediction : prediction, 1 : prob_succes_given_sentence, 0 : prob_fail_given_sentence}
+        
     }
 
 }
+
+var isPlainObject = function (obj) {
+	return Object.prototype.toString.call(obj) === '[object Object]';
+};
+
 
 function test(){
     let naive_bayes = new NaiveBayes(1)
@@ -143,6 +162,6 @@ function test(){
 
 }
 
-test()
+// test()
 
-// export default NaiveBayes;
+export default NaiveBayes;

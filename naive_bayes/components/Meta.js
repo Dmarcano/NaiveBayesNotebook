@@ -7,6 +7,14 @@ export default function Meta() {
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <meta charSet="utf-8" />
                 <title>{"Naive Bayes Classifier"}</title>
+                <link
+                href="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.9.0/katex.min.css"
+                rel="stylesheet"
+            />
+            <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script type="text/javascript" id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
                 <meta name="Description" content={"A sample interactive demo on Naive Bayes"}></meta>
             </Head>
             <style jsx global>
@@ -202,7 +210,7 @@ export default function Meta() {
                             font-size: 1rem;
                             letter-spacing: -0.5px;
                             line-height: 1.1875;
-                            color: #a0a0a0;
+                            color: black;
                             font-weight: normal;
                         }
                         p {

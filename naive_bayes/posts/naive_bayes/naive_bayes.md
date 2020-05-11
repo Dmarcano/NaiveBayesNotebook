@@ -4,6 +4,7 @@ author: Diego Marcano
 ---
 
 ## An Introduction to Bayesian Modeling 
+### By Diego Marcano
 
 
 
@@ -12,9 +13,18 @@ One of the best ways to describe what Bayesian inference means is through an exa
 
 > You are looking for a place out to eat. After finding a place, you want to make sure that you won't waste your time and money so you go and read the reviews. The first review you reads "This place has amazing food!". The next set of reviews also have a similiar tone to them reasurring you that the restaurant might be a good choice after all... 
 
+
+<center>
+
 ![alt text][sample]
 
+  *Fig. Using reviews to update our beliefs of a restaurant*
+  
 [sample]:diagrams/Restaurant_Review.png "Example of looking at a resturant reviews and updating our beliefs based on them"
+
+
+</center>
+
 
 This way of thinking is exactly what Bayesian inference is. The idea of simply updating your beliefs after considering new evidence.
 
@@ -32,6 +42,7 @@ Naive Bayes is what is called a reinforcement learning algorithm. It takes in a 
 2. Making predictions
 3. Dealing with never before seen words
 4. Naive Bayes Real World Scenario 4
+
 
 ## Step 1: Gather Dataset and Train The Classifier
 
@@ -77,11 +88,21 @@ Now we can train our model. We imagine taking each and every review. Breaking it
 | wasn't| 0  | 1| 
 | ambiance| 0  |1| 
 | terrible| 0  | 1| 
+| **total counts** | **22** | **11**|
+|**total reviews** |**6** | **4**|
+
 
 We now have a table of how many times each word occurs in positive and negative reivews. With this, Naive Bayes is trained!
  
-
 ## Step 2: Calculating Basic Predictions
+<center>
+
+!["Is this good?"](pictures/ice_cream_resized.png)
+
+*Fig. Is this good? Most Critics Agree.*
+
+</center>
+
 
 Now the Naive-Bayes classifier has been trained. It contains a bag of words that we can use to begin classifying 
 sentences into either:
@@ -106,7 +127,7 @@ First, we want to process this sentence such that we can use it in our naive bay
 <!-- TODO Add Math equation here -->
 $Food$ $taste$ $good$ $\rightarrow [food,taste,good]$
 
-[pookie](#pookie)
+
 
 
 Now from the list of words we ask the question, given a specific word, what is the probabilitiy that our review is positive or negative?
@@ -114,18 +135,99 @@ Now from the list of words we ask the question, given a specific word, what is t
 For each individual word, we simply look at the frequency each word pops up in our bag of words. A good visualization of this is making a histogram for the frequency of each word in our training set
 
 
-<!-- TODO MAKE A HISTOGRAM HERE -->
+![alt text][sampleHistogram]
 
-et's take a look at the word $good$
+[sampleHistogram]:diagrams/charts/recharts_threeword.png "Histogram of words"
+Lett's take a look at the word **good**
 
-Given that we have the word $good$, what is the probability that our review is positive?
+Given that we have the word **good**, what is the probability that our review is positive?
 
-$P(review = 1 | word = good)$
+![alt text][reviewGivenWord]
+
+[reviewGivenWord]:diagrams/review_given_word.png "review given word"
 
 By Baye's rule this is 
 
 ![alt text][bayesWordGood]
 
-[bayesWordGood]:diagrams/bayes_rule_word_good.png "Example of looking at a resturant reviews and updating our beliefs based on them"
+[bayesWordGood]:diagrams/bayes_rule_word_good.png "Bayes rule!"
+
+**Looking at each term:**
+
+1. **P(word =good | review = 1)** -> number of times that the word "good" was in a training examlpe with label "1" divided by the number of times it was in the dataset
+
+2. **P(review =1 )** -> number of training examples that were labeled as "1" (positive reviews) divided by the total number of reviews
+
+3.  **P(word = good)** -> number of times that the word "good" shows up in our training data relative to all other words
+
+Since we are dealing with a binary choice of labels we can rewrite the **P(word = good)** as 
 
 
+
+**P(word = good) = P(word = good | review = 1)P(review = 1) + P(word = good| review = 0)P(review = 0)**
+
+
+
+From the probabilities listed above we can simply get the counts from our bag of word to calculate the probability of seeing a review that is positive given the word good
+
+So with the word example this looks like
+
+
+
+
+
+## Now finding the probability of multiple words
+
+We can easily find and label a one word review as either positive or negative but what do we do with our three word sentence review? We want to find the probability that a review is either positive or negative given a set number of words. This can be written as 
+
+
+![alt text][prob_given_food_taste_good]
+
+[prob_given_food_taste_good]:diagrams/positive_review_given_words.png "good"
+
+<!-- $$ {\large P(review = positive | word_1 = food \cap word_2 = taste \cap word_3 = good )} $$ -->
+
+There are multiple ways of finding this joint probability. One approach is by directly looking for any reviews that have the words *food*, *taste*, *good*, which can lead to a lot of difficulties. Either we have to keep looking through our training every time we want to make a prediction or we have to store every single possible word combination we run across. Even then we are not guaranteed to have seen a review with any arbitrary set of words we want. 
+
+Instead we can remember the idea of joint independent probabilities. The formula for two events A and B given that A and B are independent from each other is 
+
+$${\large P(A \cap B) = P(A)P(B)}$$
+
+In our case we can rewrite the probability of seeing each specific review as the product of the probabilities of seeing each individual word much like just looking at a one word review.
+
+So 
+
+$ P(review = positive | word_1 = food \cap word_2 = taste \cap word_3 = good )  = P(review = positive | word = food)P(review = positive | word = taste)P(review = positive | word = food)$
+
+
+Now this is not entirely true. The fact that a word such as $good$ is in a review may indeed change the probability we see some other words such as $bad$ but in practice this assumption creates results that are very accurate even with small datasets.
+
+This means that for Naive Bayes, we follow the following procedure
+
+```
+1. For every word in our review:
+     a. Look up how many times the word appears for each label in our bag of words
+     b. Use Baye's rule to calculate the probability shows up for each label (eg : P(word = "good" | label  = "positive review"))
+     In our example we find the probability that we see each word in a positive and negative review. 
+
+2. Take the product of the conditional probabilities of each word and multiply them together to find the probability that a sentence belongs to a specific label
+```
+
+The equation for this process can be written as
+
+${\Large P(label = i | word_1 \cap word_2 \cap ... \cap word_n  ) =} {\Large  \frac{ (\prod_{k = 1}^{n} P(word_k | label = i ) ) \cdot P(label = i) }{\sum_{label = i}^{m} ((\prod_{k = 1}^{n} P(word_k | label = i )  \cdot P(label = i) )} } $
+
+Or the product of the probabilities of each word being in a specific label divided by the total probabilities each word belongs to all the labels
+
+
+
+## Step 3: Dealing with never before seen words
+
+As is the the current Classifier is very robust but still has one key drawback. To show this, we will look at the following review 
+
+ <center><b>Food was really bad</b></center>
+
+
+We predicted 0% chance of this review being either positive or negative!
+
+To see why this happens we need to see the bag of words for the naive bayes

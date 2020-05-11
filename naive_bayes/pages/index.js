@@ -2,8 +2,9 @@ import Layout from '../components/Layout';
 import BlogPost  from "../components/BlogTemplate"
 import fs from 'fs'
 import matter from 'gray-matter'
-import ReactMarkdown from 'react-markdown'
-
+import ReactMarkdown from 'react-markdown/with-html'
+import InteractiveBayes from '../components/InteractiveBayes/InteractiveBayes'
+import {GetTrainingData} from '../components/InteractiveBayes/InteractiveBayes'
 
 // export async function getStaticProps(){
 
@@ -13,10 +14,8 @@ export async function getStaticProps() {
   const fileContent = fs.readFileSync(fileName, 'utf8')
   const config = await import('../data/config.json')
   const data = matter(fileContent)
-  // console.log(data)
-  // console.log(fileContent)
-  // console.log("inside static props?")
 
+  const training_data = GetTrainingData()
 
 
   return {
@@ -24,6 +23,7 @@ export async function getStaticProps() {
       siteTitle: config.title,
       frontmatter: data.data,
       markdownBody: data.content,
+      training_data: training_data
     },
   }
 
@@ -38,9 +38,14 @@ export default function Index(props) {
         <article>
         {/* <h1>{'Sample'}</h1> */}
         <div>
-          <ReactMarkdown source={props.markdownBody} />
+          <ReactMarkdown source={props.markdownBody} escapeHtml={false} />
         </div>
       </article>
+
+      <InteractiveBayes data = {props.training_data}/>
+
+
+      
 
       <style jsx>{`
          h1,

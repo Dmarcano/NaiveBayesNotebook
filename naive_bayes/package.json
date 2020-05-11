@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@material-ui/core": "^4.9.13",
+    "d3": "^5.16.0",
     "fs": "0.0.1-security",
     "gray-matter": "^4.0.2",
     "next": "9.3.6",
@@ -16,6 +17,8 @@
     "raw-loader": "^4.0.1",
     "react": "16.13.1",
     "react-dom": "16.13.1",
-    "react-markdown": "^4.3.1"
+    "react-latex": "^1.6.0",
+    "react-markdown": "^4.3.1",
+    "recharts": "^1.8.5"
   }
 }
