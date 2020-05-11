@@ -41,10 +41,11 @@ Naive Bayes is what is called a reinforcement learning algorithm. It takes in a 
 1. Training Naive Bayes
 2. Making predictions
 3. Dealing with never before seen words
-4. Naive Bayes Real World Scenario 4
+4. Pros and Cons of Naive Bayes
+5. Naive Bayes Real World Scenario 4
 
 
-## Step 1: Gather Dataset and Train The Classifier
+## 1: Gather Dataset and Train The Classifier
 
 The most important step in all of this is gathering our dataset. Our results can vary wildly depending on how good our data is. For this example I created a sample dataset to keep things simple. 
 
@@ -94,7 +95,7 @@ Now we can train our model. We imagine taking each and every review. Breaking it
 
 We now have a table of how many times each word occurs in positive and negative reivews. With this, Naive Bayes is trained!
  
-## Step 2: Calculating Basic Predictions
+## 2: Calculating Basic Predictions
 <center>
 
 !["Is this good?"](pictures/ice_cream_resized.png)
@@ -261,13 +262,85 @@ Or the product of the probabilities of each word being in a specific label divid
 
 
 
-## Step 3: Dealing with never before seen words
+## 3: Dealing with never before seen words
 
 As is the the current Classifier is very robust but still has one key drawback. To show this, we will look at the following review 
 
  <center><b>Food was really bad</b></center>
 
+ Not too bad. If we follow the previous steps then
 
-We predicted 0% chance of this review being either positive or negative!
+ 1. Look at the bag of words for 
 
-To see why this happens we need to see the bag of words for the naive bayes
+| Word       | Positive Count         |  Negative Count | 
+| :-------------: |:-------------:| :-------------:| 
+| really| 1  | 0| 
+| food| 3  | 1| 
+| bad| 1  | 2| 
+| was| 0  | 1| 
+| **total counts** | **22** | **11**|
+|**total reviews** |**6** | **4**|
+
+
+ 
+ 2. Calculate the probabilities
+
+Here is were we go wrong. Looking at the words **really** and **was** we see that 
+they each appeared 0 times in negative and positive reviews respectively. 
+If we try to take their conditional probabilities we get
+
+**P(word =really | review = 0) = 0/1 = 0!**
+
+**P(word =really | review = 1) = 1/0 = Oh no!**
+
+**P(word =was | review = 1) = 0/1 = 0!**
+
+**P(word =was | review = 1) = 1/0 = Oh no!**
+
+
+Having not seen a word in our dataset for all labels leads us to scenarios where we multiply and divide by 0! Depending on how we implement naive Bayes, this will either crash our program or return a 0 percent probability for all labels!
+
+Because of this, we usually add to the classifier what is called a *pseudocount*. That is providing synthetic data to avoid these types of hiccups. What we do here is take every word in the bags of words, and add 1 to their total count
+
+| Word       | Good Count         |  Bad Count | 
+| :-------------: |:-------------:| :-------------:| 
+| simply| 2 +1 | 0+1 | 
+| loved| 4+1 | 0+1 | 
+| it| 2+1 | 1+1 | 
+| really| 1 +1  | 0+1 | 
+| good| 3+1 | 1+1 | 
+| food| 3+1 | 1+1 | 
+| this| 2+1 | 1+1 | 
+| taste| 1+1 | 1+1 | 
+| i| 2+1   | 0+1 | 
+| so| 1+1   | 0+1 | 
+| bad| 1+1   | 2+1 | 
+| was| 0+1   | 1+1 | 
+| wasn't| 0+1   | 1+1 | 
+| ambiance| 0+1   |1+1 | 
+| terrible| 0+1   | 1+1 | 
+| **total counts** | **22+15** | **11+15**|
+|**total reviews** |**6** | **4**|
+
+Any number can be added but adding 1 is most commonly used in practice. By Adding these counts we no longer run into the problems of having 0 frequencies. The good thing is that adding these counts also does not impede the ability for the model to make inferences even if our dataset is small.
+
+## 4: Pros and Cons of Naive Bayes 
+
+Naive Bayes is a widely known machine learning algorithm for classification problems. It is both fairly straightforward to understand and implement and can lead to quick results.
+
+Overall one can categorize the pros and cons as such:
+
+**Pro's** 
+
+* Straightforward to implement and change 
+* Very fast to train
+* Very fast to tweak
+* does not require very large datasets
+
+**Con's**
+* Diminishing returns on increasing dataset size
+* Require's field expertise on words that one might ignore or not
+* Limited if categorical data is not inherently independent
+
+More modern machine learning methods such as convolutional neural networks (CNN) and reccurrent neural networks (RNN) do a much better job when given very large datasets.
+This does not mean that there is no space for Naive Bayes as it can serve as a very good initial explaratory model of the any given dataset.

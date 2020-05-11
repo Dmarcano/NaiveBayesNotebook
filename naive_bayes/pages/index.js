@@ -4,7 +4,8 @@ import fs from 'fs'
 import matter from 'gray-matter'
 import ReactMarkdown from 'react-markdown/with-html'
 import InteractiveBayes from '../components/InteractiveBayes/InteractiveBayes'
-import {GetTrainingData} from '../components/InteractiveBayes/InteractiveBayes'
+import {GetTrainingData, GetTestingData} from '../components/InteractiveBayes/InteractiveBayes'
+import Acknoledgements from '../components/Acknowledgements'
 
 // export async function getStaticProps(){
 
@@ -16,6 +17,7 @@ export async function getStaticProps() {
   const data = matter(fileContent)
 
   const training_data = GetTrainingData()
+  const testing_data = GetTestingData()
 
 
   return {
@@ -23,7 +25,8 @@ export async function getStaticProps() {
       siteTitle: config.title,
       frontmatter: data.data,
       markdownBody: data.content,
-      training_data: training_data
+      training_data: training_data,
+      testing_data: testing_data
     },
   }
 
@@ -42,8 +45,9 @@ export default function Index(props) {
         </div>
       </article>
 
-      <InteractiveBayes data = {props.training_data}/>
+      <InteractiveBayes data = {props.training_data} testing = {props.testing_data}/>
 
+      <Acknoledgements/ >
 
       
 

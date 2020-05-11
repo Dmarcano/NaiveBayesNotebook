@@ -5,6 +5,7 @@ class NaiveBayes{
     constructor(alpha = 1){
         this.bag_of_words = {0 : {}, 1: {}};
         this.label_count = {0: 0 , 1: 0};
+        this.testing_set =  {0: [], 1: []}
         this.alpha  = Math.max(1, alpha);
         this.trained = false;
     }
@@ -35,10 +36,17 @@ class NaiveBayes{
                 }
             })
         })
+        const conjunctions = ['a', 'i', 'the', 'it', 'and', 'an', 'we', 'is', 'this', 'was', 'but', 'with']
         const all_unique_words = new Set(Object.keys(this.bag_of_words[0]).concat(Object.keys(this.bag_of_words[1])))
         for (const word of all_unique_words){
-            this.bag_of_words[0][word] = this.bag_of_words[0].hasOwnProperty(word) ? this.bag_of_words[0][word] + this.alpha : this.alpha
-            this.bag_of_words[1][word] = this.bag_of_words[1].hasOwnProperty(word) ? this.bag_of_words[1][word] + this.alpha : this.alpha
+            if(conjunctions.includes(word)){
+                this.bag_of_words[0][word] =  this.alpha
+                this.bag_of_words[1][word] = this.alpha
+            }
+            else{
+                this.bag_of_words[0][word] = this.bag_of_words[0].hasOwnProperty(word) ? this.bag_of_words[0][word] + this.alpha : this.alpha
+                this.bag_of_words[1][word] = this.bag_of_words[1].hasOwnProperty(word) ? this.bag_of_words[1][word] + this.alpha : this.alpha
+            }
         }
         
         this.trained = true;
@@ -136,6 +144,30 @@ class NaiveBayes{
         const prediction = prob_succes_given_sentence >= prob_fail_given_sentence ? 1 :0
         return {prediction : prediction, 1 : prob_succes_given_sentence, 0 : prob_fail_given_sentence}
         
+    }
+
+    store_test_data(data){
+        const parsed_csv = papa.parse(data);
+        const labels = parsed_csv.data.shift()
+       
+
+        const rows = parsed_csv.data;
+        rows.forEach = Array.prototype.forEach
+        rows.forEach(row => {
+            // 
+            const text = row[0];
+            const label = row[1];
+            this.testing_set[label].push(text)
+            // this.testing_set[label].push(text)
+        })
+    }
+
+    get_random_negative_review(){
+        return this.testing_set[0][Math.floor(Math.random() *  this.testing_set[0].length)];
+    }
+
+    get_random_positive_review(){
+        return this.testing_set[1][Math.floor(Math.random() *  this.testing_set[1].length)];
     }
 
 }
