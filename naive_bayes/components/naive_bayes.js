@@ -36,7 +36,7 @@ class NaiveBayes{
                 }
             })
         })
-        const conjunctions = ['a', 'i', 'the', 'it', 'and', 'an', 'we', 'is', 'this', 'was', 'but', 'with']
+        const conjunctions = ['a', 'i', 'the', 'it', 'and', 'an', 'we', 'is', 'this', 'was', 'but', 'with', 'are', 'so', 'be','to']
         const all_unique_words = new Set(Object.keys(this.bag_of_words[0]).concat(Object.keys(this.bag_of_words[1])))
         for (const word of all_unique_words){
             if(conjunctions.includes(word)){

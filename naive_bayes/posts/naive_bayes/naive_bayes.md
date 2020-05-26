@@ -34,7 +34,7 @@ We can try to leverage this way of thinking to create an algorithm that can use 
 
 ## Naive Bayes: A Straightforward Introduction to Bayesian Inference for Machine Learning 
 
-Naive Bayes is what is called a reinforcement learning algorithm. It takes in a sample dataset and uses that data to predict outcomes from data that it has never seen before. In our Example we're going to use a mock dataset that corresponds to positive and negative restaurant reviews. From this small set of data we will then predict wheter new reviews are positive or negative. 
+Naive Bayes is what is called a supervised learning algorithm. It takes in a sample dataset and uses that data to predict outcomes from data that it has never seen before. In our Example we're going to use a mock dataset that corresponds to positive and negative restaurant reviews. From this small set of data we will then predict wheter new reviews are positive or negative. 
 
 ### Here is the Outline of this page
 

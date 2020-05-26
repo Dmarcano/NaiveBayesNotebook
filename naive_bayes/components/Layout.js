@@ -25,7 +25,7 @@ return (
 
            <Appbar position="static" color="primary" className = {classes.appBar} >
             <div className = "footerText">
-           This Post was made possible by 
+          <a href="https://github.com/Dmarcano/NaiveBayesNotebook"> Repository</a>
             </div>
            </Appbar>
         <style jsx>{`

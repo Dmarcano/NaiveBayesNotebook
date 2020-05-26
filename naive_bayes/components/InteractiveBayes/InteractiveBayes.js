@@ -40,17 +40,19 @@ export default function InteractiveBayes(props){
         const review_type = event.target.value.split(' ')[1];
         if(review_type === "Positive"){
             const new_sentence = naive_bayes.get_random_positive_review()
-            setSentence(sentence)
+            setSentence(new_sentence)
             let word_list = naive_bayes.preprocess_sentence(new_sentence)
             setWords(word_list)
         }
         else if(review_type === "Negative"){
-            const new_sentence = naive_bayes.get_random_positive_review()
-            setSentence(sentence)
+            const new_sentence = naive_bayes.get_random_negative_review()
+            setSentence(new_sentence)
             let word_list = naive_bayes.preprocess_sentence(new_sentence)
             setWords(word_list)
 
         }
+        setNaiveBayesPrediction( naive_bayes.predict(sentence) )
+
 
     }
 

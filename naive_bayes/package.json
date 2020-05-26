@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "NODE_OPTIONS='--inspect' next",
     "build": "next build",
-    "static-build" : "next build && next export",
+    "static-build": "next build && next export",
     "start": "next start"
   },
   "dependencies": {
