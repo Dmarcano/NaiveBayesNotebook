@@ -172,7 +172,7 @@ class NaiveBayes{
 
 }
 
-var isPlainObject = function (obj) {
+const isPlainObject = function (obj) {
 	return Object.prototype.toString.call(obj) === '[object Object]';
 };
 
